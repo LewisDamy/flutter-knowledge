@@ -12,14 +12,14 @@ This repository is organized by branches, with each branch representing a specif
 flutter-course-complete/
 ├── main (this branch)
 │   └── README.md
-├── section-1-dart-flutter-basics
+├── 1-dart-flutter-basics
 │   └── roll_dice_app/
 ```
 
 ## 📱 Course Sections & Applications
 
 ### Section 1: Flutter & Dart Basics I - Getting Solid Foundation
-**Branch:** `section-1-dart-flutter-basics`  
+**Branch:** `1-dart-flutter-basics`  
 **App:** 🎲 **Roll Dice App**  
 **Key Concepts:**
 - Dart language fundamentals
@@ -34,7 +34,7 @@ flutter-course-complete/
 ### Prerequisites
 - Flutter SDK (latest stable version)
 - Dart SDK
-- Android Studio / VS Code
+- Android Studio / IntelliJ + Flutter plugin 
 - iOS simulator (for macOS users)
 - Android emulator or physical device
 
