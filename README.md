@@ -63,9 +63,9 @@ flutter-course-complete/
 
 ## 📋 Branch Naming Convention
 
-Each branch follows the pattern: `section-X-descriptive-name`
+Each branch follows the pattern: `X-descriptive-name`
 
-- `section-1-dart-flutter-basics`
+- `1-dart-flutter-basics`
 
 ## 🎯 Learning Path
 
