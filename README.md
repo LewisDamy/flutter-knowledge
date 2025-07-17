@@ -41,7 +41,7 @@ flutter-course-complete/
 ### Installation
 1. Clone the repository:
    ```bash
-   git clone https://github.com/lewis-damy/flutter-knowledge.git
+   git clone https://github.com/LewisDamy/flutter-knowledge.git
    cd flutter-knowledge
    ```
 
