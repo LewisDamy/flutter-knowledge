@@ -258,9 +258,3 @@ $RECYCLE.BIN/
 
 # Very Good CLI
 **/.vgv/
-
-
-# Ignore Projects from branches
-first_app/*
-roll_dice_app/*
-quiz_app/*
