@@ -14,6 +14,8 @@ flutter-course-complete/
 │   └── README.md
 ├── 1-dart-flutter-basics
 │   └── roll_dice_app/
+└─── 2-fundamentals-deep-dive
+    └── quiz_app/
 ```
 
 ## 📱 Course Sections & Applications
@@ -27,6 +29,18 @@ flutter-course-complete/
 - Basic app structure and layout
 - Stateless and stateful widgets
 - Event handling and user interaction
+
+### Section 2: Flutter & Dart Basics II - Fundamentals Deep Dive
+
+**Branch:** `2-fundamentals-deep-dive`  
+**App:** 📝 **Quiz App**  
+**Key Concepts:**
+
+- Advanced Dart concepts
+- Widget lifecycle management
+- State management basics
+- Lists and dynamic content
+- Custom widgets and reusability
 
 
 ## 🚀 Getting Started
