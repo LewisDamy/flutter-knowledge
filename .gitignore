@@ -258,3 +258,8 @@ $RECYCLE.BIN/
 
 # Very Good CLI
 **/.vgv/
+
+
+# Ignore first app
+first_app/*
+
