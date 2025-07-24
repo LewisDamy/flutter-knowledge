@@ -28,8 +28,6 @@ class _DiceRollerState extends State<DiceRoller> {
       mainAxisSize: MainAxisSize.min,
       children: [
         Image.asset('assets/images/dice-$currentDiceRoll.png', width: 200),
-        // TextButton(onPressed: () {}, child: const Text('Roll Dice')),
-        // PADDING ALTERNATIVE: const SizedBox(height: 20),
         ElevatedButton(
           onPressed: rollDice,
           style: ElevatedButton.styleFrom(foregroundColor: Colors.black),
