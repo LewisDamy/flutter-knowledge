@@ -27,10 +27,19 @@ jobs:
         uses: subosito/flutter-action@v2
         with:
           flutter-version: '3.32.6'
+          cache: true
 
       # Install dependencies
       - name: Install dependencies
         run: flutter pub get
+
+      # Decode and place google-services.json
+      - name: Set up google-services.json
+        run: |
+          mkdir -p android/app
+          echo "$GOOGLE_SERVICES_JSON" | base64 --decode > android/app/google-services.json
+        env:
+          GOOGLE_SERVICES_JSON: ${{ secrets.GOOGLE_SERVICES_JSON }}
 
       # Analyze the code
       - name: Analyze code
