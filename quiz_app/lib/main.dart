@@ -5,7 +5,7 @@ import "package:firebase_crashlytics/firebase_crashlytics.dart";
 import 'package:flutter/material.dart';
 import 'package:quiz_app/gradient_container.dart';
 
-void main() async {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   await Firebase.initializeApp();
@@ -20,5 +20,14 @@ void main() async {
     return true;
   };
 
-  runApp(MaterialApp(home: Scaffold(body: GradientContainer())));
+  runApp(QuizApp());
+}
+
+class QuizApp extends StatelessWidget {
+  const QuizApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return const MaterialApp(home: Scaffold(body: GradientContainer()));
+  }
 }
