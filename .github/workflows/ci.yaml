@@ -56,3 +56,43 @@ jobs:
       # - name: Build iOS
       #   if: runner.os == 'macOS'
       #   run: flutter build ios --no-codesign
+
+  release:
+    runs-on: ubuntu-latest
+    needs: build
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        users: actions/checkout@v4
+
+      - name: Download build artifacts
+        users: actions/download-artifact@v4
+        with:
+          name: release-artifacts
+          path: release-files
+
+      - name: Extract version from pubspect.yaml
+        id: get_version
+        run: |
+          VERSION=$(grep '^version:' quiz_app/pubspec.yaml | awk '{print $2}')
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Create or update release tag
+        run: |
+          TAG="${{ steps.get_version.outputs.version }}"
+          git tag -f "$TAG"
+          git push origin "$TAG" --force
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.get_version.outputs.version }}
+          name: "v${{ steps.get_version.outputs.version }}"
+          body: "Automated release generated from pubspec.yaml"
+          files: |
+            release-files/app-release.apk
+            release-files/release-artifacts.zip
+            release-files/release-artifacts.tar.gz
+
