@@ -1,0 +1,59 @@
+name: Flutter CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    name: Build and Test
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: quiz_app
+
+    steps:
+      # Checkout repository
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Set up Flutter
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.32.6'
+          cache: true
+
+      # Install dependencies
+      - name: Install dependencies
+        run: flutter pub get
+
+      # Decode and place google-services.json
+      - name: Set up google-services.json
+        run: |
+          mkdir -p android/app
+          echo "${GOOGLE_SERVICES_JSON}" > android/app/google-services.json
+        env:
+          GOOGLE_SERVICES_JSON: ${{ secrets.GOOGLE_SERVICES_JSON }}
+
+      # Analyze the code
+      - name: Analyze code
+        run: flutter analyze
+
+      # Run tests
+      - name: Run tests
+        run: flutter test
+
+      # (Optional) Build APK for Android
+      - name: Build APK
+        run: flutter build apk --release
+
+      # (Optional) Build for iOS (only works on macOS runners)
+      # - name: Build iOS
+      #   if: runner.os == 'macOS'
+      #   run: flutter build ios --no-codesign
