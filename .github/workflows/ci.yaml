@@ -11,6 +11,7 @@ on:
 jobs:
   build:
     name: Test and Build
+    if: github.event_name == 'push' || github.event.pull_request.merged == false
     runs-on: ubuntu-latest
 
     defaults:
@@ -85,6 +86,7 @@ jobs:
   release:
     runs-on: ubuntu-latest
     if: github.event_name == 'push' || github.ref == 'refs/heads/main'
+
     needs: build
     permissions:
       contents: write

@@ -1,5 +1,6 @@
 [![Flutter CI](https://github.com/LewisDamy/flutter-knowledge/actions/workflows/ci.yaml/badge.svg?branch=main)](https://github.com/LewisDamy/flutter-knowledge/actions/workflows/ci.yaml)
 ![Flutter](https://img.shields.io/badge/flutter-3.32.6-blue?logo=flutter)
+
 # Flutter SDK & Framework Complete Course
 
 A comprehensive repository containing all projects from **"A Complete Guide to the Flutter SDK & Flutter Framework for building native iOS and Android apps"** course by Academind (Maximilian Schwarzmüller).
