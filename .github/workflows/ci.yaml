@@ -62,7 +62,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: release-artifacts
-          path: build/app/outputs/flutter-apk/app-release.apk
+          path: quiz_app/build/app/outputs/flutter-apk/app-release.apk
 
   release:
     runs-on: ubuntu-latest
