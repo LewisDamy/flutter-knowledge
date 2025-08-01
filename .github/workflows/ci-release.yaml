@@ -1,4 +1,4 @@
-name: ci-release.yaml
+name: ci-release
 
 on:
   push:
@@ -19,17 +19,37 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Download build artifacts
-        uses: actions/download-artifact@v4
+      # Install Flutter
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
         with:
-          name: release-artifacts
-          path: release-files
+          flutter-version: 3.22.6 # match your version
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Decode google-services.json
+        run: |
+          mkdir -p android/app
+          echo "$GOOGLE_SERVICES_JSON" | base64 --decode > android/app/google-services.json
+        env:
+          GOOGLE_SERVICES_JSON: ${{ secrets.GOOGLE_SERVICES_JSON }}
+
+      - name: Build APK
+        run: flutter build apk --release
 
       - name: Extract version from pubspec.yaml
         id: get_version
         run: |
           VERSION=$(grep '^version:' quiz_app/pubspec.yaml | awk '{print $2}')
           echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Rename artifacts
+        run: |
+          mkdir -p release-files
+          cp build/app/outputs/flutter-apk/app-release.apk release-files/app-release-v${{ steps.get_version.outputs.version }}.apk
+          cp build/app/outputs/flutter-apk/app-release.apk release-files/release-artifacts-v${{ steps.get_version.outputs.version }}.zip
+          cp build/app/outputs/flutter-apk/app-release.apk release-files/release-artifacts-v${{ steps.get_version.outputs.version }}.tar.gz
 
       - name: Create or update release tag
         run: |
@@ -62,6 +82,6 @@ jobs:
             ## Release Notes
             ${{ steps.extract_notes.outputs.notes }}
           files: |
-            release-files/app-release-v${{ steps.version.outputs.version }}.apk
-            release-files/release-artifacts-v${{ steps.version.outputs.version }}.zip
-            release-files/release-artifacts-v${{ steps.version.outputs.version }}.tar.gz
+            release-files/app-release-v${{ steps.get_version.outputs.version }}.apk
+            release-files/release-artifacts-v${{ steps.get_version.outputs.version }}.zip
+            release-files/release-artifacts-v${{ steps.get_version.outputs.version }}.tar.gz
