@@ -1,0 +1,49 @@
+name: ci-release.yaml
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    defaults:
+      run:
+        working-directory: quiz_app
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: release-artifacts
+          path: release-files
+
+      - name: Extract version from pubspec.yaml
+        id: get_version
+        run: |
+          VERSION=$(grep '^version:' quiz_app/pubspec.yaml | awk '{print $2}')
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Create or update release tag
+        run: |
+          TAG="${{ steps.get_version.outputs.version }}"
+          git tag -f "$TAG"
+          git push origin "$TAG" --force
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.get_version.outputs.version }}
+          name: "v${{ steps.get_version.outputs.version }}"
+          body: "Automated release generated from pubspec.yaml"
+          files: |
+            release-files/app-release-v${{ steps.version.outputs.version }}.apk
+            release-files/release-artifacts-v${{ steps.version.outputs.version }}.zip
+            release-files/release-artifacts-v${{ steps.version.outputs.version }}.tar.gz
