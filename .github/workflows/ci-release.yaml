@@ -1,5 +1,6 @@
 name: ci-release
 
+
 on:
   push:
     branches:
@@ -18,6 +19,7 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+
 
       # Install Flutter
       - name: Set up Flutter
@@ -38,11 +40,19 @@ jobs:
       - name: Build APK
         run: flutter build apk --release
 
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: release-artifacts
+          path: release-files
+
+
       - name: Extract version from pubspec.yaml
         id: get_version
         run: |
           VERSION=$(grep '^version:' quiz_app/pubspec.yaml | awk '{print $2}')
           echo "version=$VERSION" >> $GITHUB_OUTPUT
+
 
       - name: Rename artifacts
         run: |
@@ -50,6 +60,7 @@ jobs:
           cp build/app/outputs/flutter-apk/app-release.apk release-files/app-release-v${{ steps.get_version.outputs.version }}.apk
           cp build/app/outputs/flutter-apk/app-release.apk release-files/release-artifacts-v${{ steps.get_version.outputs.version }}.zip
           cp build/app/outputs/flutter-apk/app-release.apk release-files/release-artifacts-v${{ steps.get_version.outputs.version }}.tar.gz
+
 
       - name: Create or update release tag
         run: |
