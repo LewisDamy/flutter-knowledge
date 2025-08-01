@@ -118,7 +118,6 @@ jobs:
           name: "v${{ steps.get_version.outputs.version }}"
           body: "Automated release generated from pubspec.yaml"
           files: |
-            release-files/app-release.apk
-            release-files/release-artifacts.zip
-            release-files/release-artifacts.tar.gz
-
+            release-files/app-release-v${{ steps.version.outputs.version }}.apk
+            release-files/release-artifacts-v${{ steps.version.outputs.version }}.zip
+            release-files/release-artifacts-v${{ steps.version.outputs.version }}.tar.gz
