@@ -10,7 +10,8 @@ on:
 
 jobs:
   build:
-    name: Build and Test
+    name: Test and Build
+    if: github.event_name == 'push' || github.event.pull_request.merged == false
     runs-on: ubuntu-latest
 
     defaults:
@@ -80,7 +81,7 @@ jobs:
           name: release-artifacts
           path: release-files
 
-      - name: Extract version from pubspect.yaml
+      - name: Extract version from pubspec.yaml
         id: get_version
         run: |
           VERSION=$(grep '^version:' quiz_app/pubspec.yaml | awk '{print $2}')
