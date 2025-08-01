@@ -1,0 +1,67 @@
+name: ci-release.yaml
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    defaults:
+      run:
+        working-directory: quiz_app
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: release-artifacts
+          path: release-files
+
+      - name: Extract version from pubspec.yaml
+        id: get_version
+        run: |
+          VERSION=$(grep '^version:' quiz_app/pubspec.yaml | awk '{print $2}')
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Create or update release tag
+        run: |
+          TAG="${{ steps.get_version.outputs.version }}"
+          git tag -f "$TAG"
+          git push origin "$TAG" --force
+
+      - name: Get PR description
+        id: pr
+        uses: actions-ecosystem/action-get-merged-pull-request@v1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract release notes
+        id: extract_notes
+        run: |
+          PR_BODY="${{ steps.pr.outputs.body }}"
+          NOTES=$(echo "$PR_BODY" | sed -n '/## Release Notes/,/## /p' | sed '1d;$d' || true)
+          [ -z "$NOTES" ] && NOTES="No release notes provided."
+          echo "notes<<EOF" >> $GITHUB_OUTPUT
+          echo "$NOTES" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.get_version.outputs.version }}
+          name: "v${{ steps.get_version.outputs.version }}"
+          body: |
+            ## Release Notes
+            ${{ steps.extract_notes.outputs.notes }}
+          files: |
+            release-files/app-release-v${{ steps.version.outputs.version }}.apk
+            release-files/release-artifacts-v${{ steps.version.outputs.version }}.zip
+            release-files/release-artifacts-v${{ steps.version.outputs.version }}.tar.gz
