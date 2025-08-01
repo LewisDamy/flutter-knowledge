@@ -65,10 +65,10 @@ jobs:
 
     steps:
       - name: Checkout repository
-        users: actions/checkout@v4
+        uses: actions/checkout@v4
 
       - name: Download build artifacts
-        users: actions/download-artifact@v4
+        uses: actions/download-artifact@v4
         with:
           name: release-artifacts
           path: release-files
