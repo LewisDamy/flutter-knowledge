@@ -1,4 +1,4 @@
-name: ci-release
+name: Flutter Release
 
 on:
   push:
@@ -11,64 +11,47 @@ jobs:
     permissions:
       contents: write
 
-    defaults:
-      run:
-        working-directory: quiz_app
-
     steps:
+      # Checkout repository
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # Install Flutter
-      - name: Set up Flutter
-        uses: subosito/flutter-action@v2
-        with:
-          flutter-version: '3.32.6'
-
-      - name: Install dependencies
-        run: flutter pub get
-
-      - name: Set up google-services.json
-        run: |
-          mkdir -p android/app
-          echo "${GOOGLE_SERVICES_JSON}" > android/app/google-services.json
-        env:
-          GOOGLE_SERVICES_JSON: ${{ secrets.GOOGLE_SERVICES_JSON }}
-
-      - name: Build APK
-        run: flutter build apk --release
-
-      # Upload APK
-      - name: Upload APK
-        uses: actions/upload-artifact@v4
-        with:
-          name: release-artifacts
-          path: build/app/outputs/flutter-apk/app-release.apk
-
+      # Download build artifacts from "build" job
       - name: Download build artifacts
         uses: actions/download-artifact@v4
         with:
           name: release-artifacts
           path: release-files
 
+      # Extract version from pubspec.yaml
       - name: Extract version from pubspec.yaml
         id: get_version
         run: |
-          VERSION=$(grep '^version:' pubspec.yaml | awk '{print $2}')
+          VERSION=$(grep '^version:' quiz_app/pubspec.yaml | awk '{print $2}' | cut -d'+' -f1)
           echo "version=$VERSION" >> $GITHUB_OUTPUT
 
+      # Rename APK with version
+      - name: Rename APK
+        run: |
+          mv release-files/app-release.apk release-files/app-release-v${{ steps.get_version.outputs.version }}.apk
+
+      # Create or update release tag
       - name: Create or update release tag
         run: |
-          TAG="${{ steps.get_version.outputs.version }}"
+          TAG="v${{ steps.get_version.outputs.version }}"
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
           git tag -f "$TAG"
           git push origin "$TAG" --force
 
+      # Get merged PR description
       - name: Get PR description
         id: pr
         uses: actions-ecosystem/action-get-merged-pull-request@v1
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
 
+      # Extract release notes from PR body
       - name: Extract release notes
         id: extract_notes
         run: |
@@ -79,15 +62,14 @@ jobs:
           echo "$NOTES" >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
 
+      # Create GitHub Release
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ steps.get_version.outputs.version }}
+          tag_name: v${{ steps.get_version.outputs.version }}
           name: "v${{ steps.get_version.outputs.version }}"
           body: |
             ## Release Notes
             ${{ steps.extract_notes.outputs.notes }}
           files: |
             release-files/app-release-v${{ steps.get_version.outputs.version }}.apk
-            release-files/release-artifacts-v${{ steps.get_version.outputs.version }}.zip
-            release-files/release-artifacts-v${{ steps.get_version.outputs.version }}.tar.gz
