@@ -71,3 +71,10 @@ jobs:
       # - name: Build iOS
       #   if: runner.os == 'macOS'
       #   run: flutter build ios --no-codesign
+
+      # Upload APK
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-artifacts
+          path: quiz_app/build/app/outputs/flutter-apk/app-release.apk
