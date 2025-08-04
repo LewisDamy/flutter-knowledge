@@ -84,7 +84,18 @@ jobs:
           VERSION=$(grep '^version:' quiz_app/pubspec.yaml | awk '{print $2}')
           echo "version=$VERSION" >> $GITHUB_OUTPUT
 
-      # Extract release notes
+      - name: Rename APK and artifacts
+        run: |
+          mv release-files/app-release.apk release-files/app-release-v${{ steps.get_version.outputs.version }}.apk
+          cp release-files/app-release-v${{ steps.get_version.outputs.version }}.apk release-files/release-artifacts-v${{ steps.get_version.outputs.version }}.zip
+          cp release-files/app-release-v${{ steps.get_version.outputs.version }}.apk release-files/release-artifacts-v${{ steps.get_version.outputs.version }}.tar.gz
+
+      - name: Get PR description
+        id: pr
+        uses: actions-ecosystem/action-get-merged-pull-request@v1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Extract release notes
         id: extract_notes
         run: |
