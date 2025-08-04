@@ -1,4 +1,4 @@
-name: Release
+name: Flutter CI
 
 on:
   push:
@@ -7,7 +7,7 @@ on:
 
 jobs:
   build:
-    name: Release
+    name: Test and Build
     runs-on: ubuntu-latest
 
     defaults:
@@ -25,24 +25,6 @@ jobs:
         with:
           flutter-version: '3.32.6'
 
-      - name: Cache Flutter dependencies
-        uses: actions/cache@v4
-        with:
-          path: ~/.pub-cache
-          key: ${{ runner.os }}-flutter-${{ hashFiles('**/pubspec.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-flutter-
-
-      - name: Cache Gradle
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.gradle/caches
-            ~/.gradle/wrapper
-          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
-          restore-keys: |
-            ${{ runner.os }}-gradle-
-
       # Install dependencies
       - name: Install dependencies
         run: flutter pub get
@@ -56,12 +38,12 @@ jobs:
           GOOGLE_SERVICES_JSON: ${{ secrets.GOOGLE_SERVICES_JSON }}
 
       # Analyze the code
-      #      - name: Analyze code
-      #        run: flutter analyze
+      - name: Analyze code
+        run: flutter analyze
 
       # Run tests
-      #      - name: Run tests
-      #        run: flutter test
+      - name: Run tests
+        run: flutter test
 
       # (Optional) Build APK for Android
       - name: Build APK
@@ -72,6 +54,12 @@ jobs:
       #   if: runner.os == 'macOS'
       #   run: flutter build ios --no-codesign
 
+      # Upload APK
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-artifacts
+          path: quiz_app/build/app/outputs/flutter-apk/app-release.apk
 
   release:
     runs-on: ubuntu-latest
@@ -95,12 +83,7 @@ jobs:
           VERSION=$(grep '^version:' quiz_app/pubspec.yaml | awk '{print $2}')
           echo "version=$VERSION" >> $GITHUB_OUTPUT
 
-      - name: Create or update release tag
-        run: |
-          TAG="${{ steps.get_version.outputs.version }}"
-          git tag -f "$TAG"
-          git push origin "$TAG" --force
-
+      # Extract release notes
       - name: Extract release notes
         id: extract_notes
         run: |
@@ -111,6 +94,12 @@ jobs:
           echo "$NOTES" >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
 
+      - name: Create or update release tag
+        run: |
+          TAG="${{ steps.get_version.outputs.version }}"
+          git tag -f "$TAG"
+          git push origin "$TAG" --force
+
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
@@ -120,6 +109,6 @@ jobs:
             ## Release Notes
             ${{ steps.extract_notes.outputs.notes }}
           files: |
-            release-files/app-release-v${{ steps.get_version.outputs.version }}.apk
-            release-files/release-artifacts-v${{ steps.get_version.outputs.version }}.zip
-            release-files/release-artifacts-v${{ steps.get_version.outputs.version }}.tar.gz
+            release-files/app-release.apk
+            release-files/release-artifacts.zip
+            release-files/release-artifacts.tar.gz
