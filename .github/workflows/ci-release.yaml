@@ -38,23 +38,23 @@ jobs:
       - name: Build APK
         run: flutter build apk --release
 
+      # Upload APK
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-artifacts
+          path: build/app/outputs/flutter-apk/app-release.apk
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: release-artifacts
+          path: release-files
+
       - name: Extract version from pubspec.yaml
         id: get_version
         run: |
-          VERSION=$(grep '^version:' quiz_app/pubspec.yaml | awk '{print $2}')
-          echo "version=$VERSION" >> $GITHUB_OUTPUT
-
-      - name: Rename artifacts
-        run: |
-          mkdir -p release-files
-          cp build/app/outputs/flutter-apk/app-release.apk release-files/app-release-v${{ steps.get_version.outputs.version }}.apk
-          cp build/app/outputs/flutter-apk/app-release.apk release-files/release-artifacts-v${{ steps.get_version.outputs.version }}.zip
-          cp build/app/outputs/flutter-apk/app-release.apk release-files/release-artifacts-v${{ steps.get_version.outputs.version }}.tar.gz
-
-      - name: Extract version from pubspec.yaml
-        id: get_version
-        run: |
-          VERSION=$(grep '^version:' quiz_app/pubspec.yaml | awk '{print $2}')
+          VERSION=$(grep '^version:' pubspec.yaml | awk '{print $2}')
           echo "version=$VERSION" >> $GITHUB_OUTPUT
 
       - name: Create or update release tag
