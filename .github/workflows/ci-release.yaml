@@ -1,4 +1,4 @@
-name: Flutter Release
+name: ci-release
 
 on:
   push:
@@ -12,46 +12,49 @@ jobs:
       contents: write
 
     steps:
-      # Checkout repository
+      # 1. Checkout repository
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # Download build artifacts from "build" job
+      # 2. Download the APK artifact
       - name: Download build artifacts
         uses: actions/download-artifact@v4
         with:
           name: release-artifacts
           path: release-files
 
-      # Extract version from pubspec.yaml
+      # 3. Extract version from pubspec.yaml
       - name: Extract version from pubspec.yaml
         id: get_version
         run: |
           VERSION=$(grep '^version:' quiz_app/pubspec.yaml | awk '{print $2}' | cut -d'+' -f1)
+          if [ -z "$VERSION" ]; then
+            echo "Error: Version not found in pubspec.yaml"
+            exit 1
+          fi
           echo "version=$VERSION" >> $GITHUB_OUTPUT
 
-      # Rename APK with version
-      - name: Rename APK
+      # 4. Rename APK with version
+      - name: Rename APK artifact
         run: |
+          mkdir -p release-files
           mv release-files/app-release.apk release-files/app-release-v${{ steps.get_version.outputs.version }}.apk
 
-      # Create or update release tag
+      # 5. Create or update release tag
       - name: Create or update release tag
         run: |
           TAG="v${{ steps.get_version.outputs.version }}"
-          git config user.name "github-actions"
-          git config user.email "github-actions@github.com"
           git tag -f "$TAG"
           git push origin "$TAG" --force
 
-      # Get merged PR description
+      # 6. Get PR description
       - name: Get PR description
         id: pr
         uses: actions-ecosystem/action-get-merged-pull-request@v1
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
 
-      # Extract release notes from PR body
+      # 7. Extract release notes from PR body
       - name: Extract release notes
         id: extract_notes
         run: |
@@ -62,7 +65,7 @@ jobs:
           echo "$NOTES" >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
 
-      # Create GitHub Release
+      # 8. Create GitHub Release
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
